@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>First-Car Shortlist — Facebook Marketplace</title>
+<style>
+  body { font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; background: #f4f5f7; color: #1c1e21; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 26px; margin: 0 0 4px; }
+  .sub { color: #606770; margin: 0 0 20px; font-size: 14px; }
+  .criteria { background: #fff; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; font-size: 14px; line-height: 1.55; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .criteria b { color: #111; }
+  .card { background: #fff; border-radius: 12px; padding: 18px 20px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.08); border-left: 5px solid #2f9e44; }
+  .card.warn { border-left-color: #e67700; }
+  .card h2 { font-size: 19px; margin: 0 0 2px; }
+  .card h2 a { color: #0b5ed7; text-decoration: none; }
+  .card h2 a:hover { text-decoration: underline; }
+  .meta { font-size: 13px; color: #606770; margin-bottom: 10px; }
+  .specs { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px 14px; font-size: 14px; margin: 10px 0; }
+  .specs div b { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .4px; color: #90949c; font-weight: 600; }
+  .note { font-size: 14px; line-height: 1.5; background: #f0f4ff; border-radius: 8px; padding: 10px 12px; margin-top: 10px; }
+  .flag { font-size: 13px; font-weight: 700; color: #7a4a00; background: #fff4d6; border-radius: 6px; padding: 3px 8px; display: inline-block; margin-bottom: 8px; }
+  .rank { font-size: 12px; font-weight: 800; color: #fff; background: #2f9e44; border-radius: 50%; width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center; margin-right: 8px; vertical-align: 2px; }
+  .card.warn .rank { background: #e67700; }
+  .footer { font-size: 13px; color: #606770; line-height: 1.6; margin-top: 28px; }
+  .btn { display: inline-block; margin-top: 10px; background: #0b5ed7; color: #fff !important; padding: 9px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; }
+
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: #fff; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(0,0,0,.08); font-size: 14px; }
+  .toolbtn { background: #0b5ed7; color: #fff; border: none; padding: 9px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; }
+  .toolbtn.secondary { background: #e4e6eb; color: #1c1e21; }
+  .toolbtn:disabled { opacity: .6; }
+  .hidewrap { display: flex; align-items: center; gap: 6px; color: #606770; }
+  .toolbar .hint { width: 100%; font-size: 12px; color: #90949c; }
+  .presetrow { width: 100%; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13px; color: #606770; }
+  .presetbtn { font-size: 13px; padding: 6px 14px; border-radius: 20px; border: 1px solid #0b5ed7; background: #fff; color: #0b5ed7; font-weight: 600; cursor: pointer; }
+  .presetbtn.active { background: #0b5ed7; color: #fff; }
+  .townselect { font-size: 13px; padding: 6px 10px; border-radius: 20px; border: 1px solid #0b5ed7; background: #fff; color: #0b5ed7; font-weight: 600; }
+  .ziprow { width: 100%; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  #zipInput { font-size: 14px; padding: 8px 12px; border-radius: 8px; border: 1px solid #ccd0d5; width: 220px; max-width: 60%; }
+  #zipMsg { font-size: 12px; color: #90949c; }
+  .statusbar { margin-top: 12px; display: flex; gap: 8px; align-items: center; }
+  .stbtn { font-size: 13px; padding: 6px 14px; border-radius: 20px; border: 1px solid #ccd0d5; background: #fff; color: #1c1e21; cursor: pointer; }
+  .stbtn.on-contacted { background: #0b5ed7; border-color: #0b5ed7; color: #fff; font-weight: 700; }
+  .stbtn.on-sold { background: #606770; border-color: #606770; color: #fff; font-weight: 700; }
+  .stbadge { font-size: 12px; font-weight: 700; }
+  .card.is-contacted { border-left-color: #0b5ed7; }
+  .card.is-contacted .stbadge { color: #0b5ed7; }
+  .card.is-sold { opacity: .55; }
+  .card.is-sold .stbadge { color: #606770; }
+  .stbtn.on-dan { background: #2f9e44; border-color: #2f9e44; color: #fff; font-weight: 700; }
+  .card.is-dan { border-left-color: #2f9e44; }
+  .bench-empty { background: #fff; border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; font-size: 14px; color: #606770; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .card.hide-sold-card { display: none; }
+  .distline { font-size: 13px; color: #0b5ed7; font-weight: 700; margin: 6px 0 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>🚗 First-Car Shortlist</h1>
+<p class="sub">Marketplace + Craigslist scan &#183; updated Oct 10, 2026 &#183; ~270 FB listings reviewed this run, 20 picks (17 Facebook + 3 Craigslist)</p>
+
+<div class="criteria">
+<b>Search criteria applied:</b> VW / Honda / Toyota / Subaru / Nissan (+ Audi, Acura, Lexus, Infiniti) — no American or Korean brands &middot;
+$2,000–$3,500 &middot; 2010 or newer &middot; <b>under 180,000 miles (hard cap)</b> &middot; automatic &middot; FWD or AWD &middot;
+4-cylinder &middot; sedan / wagon / hatchback / small SUV &middot; private sellers only (dealers, clickbait/down-payment ads, and Spanish-only listings excluded; Long Island excluded) &middot; <b>clean titles only — rebuilt/salvage excluded entirely</b>.<br><br>
+<b>Brand preference:</b> Volkswagen ranked first, then Honda/Toyota/Subaru, then Nissan.<br><br>
+<b>Sources:</b> Facebook Marketplace (fresh full scan, Oct 10) + Craigslist owner sections for Hartford, New Haven &amp; New London.<br><br>
+<b>Geography:</b> Jack's polygon — the Willimantic–Providence triangle, south to the CT shoreline, west along the shore to Milford, and the Route 2 corridor across to Hartford. Nothing north or west of Hartford. Cars Jack marked contacted stay; marked gone are dropped.<br><br>
+<b>Phone numbers:</b> none of the Marketplace sellers published a phone number — contact is through Facebook Messenger via each listing link.
+</div>
+
+
+<div class="toolbar">
+  <button id="sortBtn" class="toolbtn" type="button">📍 Sort by distance from me</button>
+  <button id="resetBtn" class="toolbtn secondary" type="button">↺ Original order</button>
+  <label class="hidewrap"><input type="checkbox" id="hideSold"> Hide sold</label>
+  <div class="presetrow"><span>Or sort from:</span>
+    <button class="presetbtn" data-preset="ledyard" type="button">Ledyard</button>
+    <button class="presetbtn" data-preset="willimantic" type="button">Willimantic</button>
+    <button class="presetbtn" data-preset="hamden" type="button">Hamden</button>
+    <button class="presetbtn" data-preset="branford" type="button">Branford</button>
+    <button class="presetbtn" data-preset="providence" type="button">Providence</button>
+    <select id="townSelect" class="townselect" aria-label="Sort from another town">
+      <option value="">More towns…</option>
+      <option value="norwich">Norwich, CT</option>
+      <option value="newlondon">New London, CT</option>
+      <option value="groton">Groton, CT</option>
+      <option value="waterford">Waterford, CT</option>
+      <option value="newhaven">New Haven, CT</option>
+      <option value="hartford">Hartford, CT</option>
+      <option value="middletown">Middletown, CT</option>
+      <option value="worcester">Worcester, MA</option>
+      <option value="warwick">Warwick, RI</option>
+      <option value="newport">Newport, RI</option>
+    </select>
+  </div>
+  <div class="ziprow">
+    <input id="zipInput" type="text" inputmode="search" enterkeyhint="search" placeholder="Or type a ZIP / town — e.g. 02903" autocomplete="off">
+    <button id="zipBtn" class="presetbtn" type="button">Sort</button>
+    <span id="zipMsg"></span>
+  </div>
+  <div class="hint">Tap <b>✓ Contacted</b>, <b>Sold / gone</b> or <b>Dan approved</b> on any card — your marks are saved on this device, even when the list updates.</div>
+</div>
+<div class="section" id="mp-section">
+<div class="card" data-id="1592084419064391" data-lat="41.82388" data-lng="-71.41198" data-orig="">
+  <h2><span class="rank">1</span><a href="https://www.facebook.com/marketplace/item/1592084419064391">2014 Nissan Altima 2.5 S — $3,495</a></h2>
+  <div class="meta">Providence, RI · ~40 min from Ledyard · Seller: Lituania YManuel (3.9★, 12 reviews, 14-yr account)</div>
+  <div class="specs">
+    <div><b>Mileage</b>87,329</div>
+    <div><b>Title</b>Unverified</div>
+    <div><b>Drivetrain</b>FWD</div>
+  </div>
+  <div class="note">Lowest miles in the whole list by a wide margin — 87k on a 2014. The ad is paper-thin ("drive and run great low miles"), so the viewing does the talking.</div>
+  <a class="btn" href="https://www.facebook.com/marketplace/item/1592084419064391">Open listing</a>
+<div class="statusbar"><button class="stbtn" data-act="contacted" type="button">✓ Contacted</button><button class="stbtn" data-act="sold" type="button">Sold / gone</button><button class="stbtn" data-act="dan" type="button">Dan approved</button><span class="stbadge"></span></div></div>
+<div class="card warn" data-id="1856088305751021" data-lat="41.39318" data-lng="-72.79109" data-orig="">
+  <h2><span class="rank">2</span><a href="https://www.facebook.com/marketplace/item/1856088305751021">2011 Nissan Rogue AWD &#8212; $2,500</a></h2>
+  <div class="flag">&#9888; Airbag light is on (seller discloses it) &#8212; price that into any offer and make it your brother's first check</div>
+  <div class="meta">Northford, CT &#183; ~10 min from the Branford garage &#183; Seller: Dennis Saat (4.6&#9733;, 21 reviews, 4-yr account)</div>
+  <div class="specs">
+    <div><b>Mileage</b>102,000</div>
+    <div><b>Transmission</b>Automatic</div>
+    <div><b>Drivetrain</b>AWD</div>
+    <div><b>Engine</b>2.5L 4-cyl</div>
+    <div><b>Title</b>Clean</div>
+  </div>
+  <div class="note">The standout of this scan: 102k miles at $2,500 with a clean title and a solid private seller, in Northford &#8212; ten minutes from your brother's garage. Nissan ranks last on brand, but the location and price-to-miles are the best combo on the list. Minor front-bumper damage and a slight muffler noise are also disclosed &#8212; inspect in person and get the airbag light read first.</div>
+  <a class="btn" href="https://www.facebook.com/marketplace/item/1856088305751021">Open listing</a>
+<div class="statusbar"><button class="stbtn" data-act="contacted" type="button">&#10003; Contacted</button><button class="stbtn" data-act="sold" type="button">Sold / gone</button><button class="stbtn" data-act="dan" type="button">Dan approved</button><span class="stbadge"></span></div></div>
+<div class="card" data-id="1439089208287278" data-lat="41.82388" data-lng="-71.41198" data-orig="">
+  <h2><span class="rank">3</span><a href="https://www.facebook.com/marketplace/item/1439089208287278">2011 Subaru Forester 2.5i Premium — $3,400</a></h2>
+  <div class="meta">Providence, RI · ~40 min from Ledyard · Seller: Anibal Estrella Flores (4.6★, 32 reviews, 17-yr account)</div>
+  <div class="specs">
+    <div><b>Mileage</b>142,300</div><div><b>Title</b>Clean</div><div><b>Drivetrain</b>AWD</div>
+  </div>
+  <div class="note">AWD wagon, fresh oil change, RI inspected through 09/28, seller says no oil leaks. The ad tone is gruff — ignore it; a 17-year account with 32 reviews at 4.6★ is one of the strongest sellers on this list.</div>
+  <a class="btn" href="https://www.facebook.com/marketplace/item/1439089208287278">Open listing</a>
+<div class="statusbar"><button class="stbtn" data-act="contacted" type="button">✓ Contacted</button><button class="stbtn" data-act="sold" type="button">Sold / gone</button><button class="stbtn" data-act="dan" type="button">Dan approved</button><span class="stbadge"></span></div></div>
+
+<div class="card" data-id="2280825426090283" data-lat="41.82558" data-lng="-71.50199" data-orig="">
+  <h2><span class="rank">4</span><a href="https://www.facebook.com/marketplace/item/2280825426090283">2014 Volkswagen Jetta 1.8T SE — $2,995</a></h2>
+  <div class="meta">Johnston, RI · ~40 min from Ledyard · Seller: Mike Capp (4.6★, 9 reviews, 17-yr account)</div>
+  <div class="specs">
+    <div><b>Mileage</b>158,000</div>
+    <div><b>Transmission</b>Automatic</div>
+    <div><b>Drivetrain</b>FWD</div>
+    <div><b>Engine</b>1.8L 4-cyl turbo</div>
+  </div>
+  <div class="note">4-cylinder turbo that's still easy on gas. Sensible drive from Ledyard; farther from the Branford garage, so budget a trip if your brother wants eyes on it.</div>
+  <a class="btn" href="https://www.facebook.com/marketplace/item/2280825426090283">Open listing</a>
+<div class="statusbar"><button class="stbtn" data-act="contacted" type="button">✓ Contacted</button><button class="stbtn" data-act="sold" type="button">Sold / gone</button><button class="stbtn" data-act="dan" type="button">Dan approved</button><span class="stbadge"></span></div></div>
+<div class="card" data-id="4407485062914201" data-lat="41.82388" data-lng="-71.41198" data-orig="">
+  <h2><span class="rank">5</span><a href="https://www.facebook.com/marketplace/item/4407485062914201">2014 Nissan Rogue Select S — $3,500</a></h2>
+  <div class="meta">Providence, RI · ~40 min from Ledyard · Seller: Damian Elijah Cruzado (4.0★, 30 reviews, 6-yr account)</div>
+  <div class="specs">
+    <div><b>Mileage</b>158,000</div><div><b>Title</b>Clean</div><div><b>Drivetrain</b>AWD</div>
+  </div>
+  <div class="note">Inspected and ready to go; only needs rear brakes (cheap job). Solid seller history. Newest Rogue on the list.</div>
+  <a class="btn" href="https://www.facebook.com/marketplace/item/4407485062914201">Open listing</a>
+<div class="statusbar"><button class="stbtn" data-act="contacted" type="button">✓ Contacted</button><button class="stbtn" data-act="sold" type="button">Sold / gone</button><button class="stbtn" data-act="dan" type="button">Dan approved</button><span class="stbadge"></span></div></div>
+<div class="card" data-id="1869552544215854" data-lat="41.85445" data-lng="-71.75406" data-orig="">
+  <h2><span class="rank">6</span><a href="https://www.facebook.com/marketplace/item/1869552544215854">2013 Volkswagen Tiguan 2.0T SE — $3,400</a></h2>
+  <div class="meta">Foster, RI · ~35 min from Ledyard · Seller: Arturo Luiz Rivera (17-yr account, no reviews)</div>
+  <div class="specs">
+    <div><b>Mileage</b>160,000</div>
+    <div><b>Transmission</b>Automatic</div>
+    <div><b>Drivetrain</b>AWD</div>
+    <div><b>Engine</b>2.0L 4-cyl turbo</div>
+  </div>
+  <div class="note">Clean title, small AWD SUV in your body-style list, and close to home. Thin ad with no description, and $3,400 is ambitious for the info given — verify everything in person and negotiate.</div>
+  <a class="btn" href="https://www.facebook.com/marketplace/item/1869552544215854">Open listing</a>
+<div class="statusbar"><button class="stbtn" data-act="contacted" type="button">✓ Contacted</button><button class="stbtn" data-act="sold" type="button">Sold / gone</button><button class="stbtn" data-act="dan" type="button">Dan approved</button><span class="stbadge"></span></div></div>
+<div class="card" data-id="985934734526044" data-lat="41.86393" data-lng="-71.39349" data-orig="">
+  <h2><span class="rank">7</span><a href="https://www.facebook.com/marketplace/item/985934734526044">2012 Subaru Outback 2.5i — $3,500</a></h2>
+  <div class="meta">Pawtucket, RI · ~45 min from Ledyard · Seller: Lilia Monteiro (3.7★, 12 reviews, 18-yr account)</div>
+  <div class="specs">
+    <div><b>Mileage</b>169,907</div>
+    <div><b>Title</b>Unverified</div>
+    <div><b>Drivetrain</b>AWD</div>
+  </div>
+  <div class="note">AWD wagon with the VIN posted right in the ad (4S4BRBGC3C3265116) — run it before going. The ad reads like a small dealer ("message us", business hours, hashtags), so verify it's a private sale and the title is in the seller's name.</div>
+  <a class="btn" href="https://www.facebook.com/marketplace/item/985934734526044">Open listing</a>
+<div class="statusbar"><button class="stbtn" data-act="contacted" type="button">✓ Contacted</button><button class="stbtn" data-act="sold" type="button">Sold / gone</button><button class="stbtn" data-act="dan" type="button">Dan approved</button><span class="stbadge"></span></div></div>
+
+<div class="card warn" data-id="2018670405475341" data-lat="41.82388" data-lng="-71.41198" data-orig="">
+  <h2><span class="rank">8</span><a href="https://www.facebook.com/marketplace/item/2018670405475341">2014 Nissan Rogue SL — $3,000</a></h2>
+  <div class="meta">Providence, RI · ~40 min from Ledyard · Seller: Tito Guineo (4.2★, 12 reviews, 3-yr account)</div>
+  <div class="specs">
+    <div><b>Mileage</b>155,123</div><div><b>Title</b>Unverified</div><div><b>Drivetrain</b>AWD</div>
+  </div>
+  <div class="note">Thin ad ('155k good condition') and the title isn't confirmed in the listing — verify both with the seller before making the trip.</div>
+  <a class="btn" href="https://www.facebook.com/marketplace/item/2018670405475341">Open listing</a>
+<div class="statusbar"><button class="stbtn" data-act="contacted" type="button">✓ Contacted</button><button class="stbtn" data-act="sold" type="button">Sold / gone</button><button class="stbtn" data-act="dan" type="button">Dan approved</button><span class="stbadge"></span></div></div>
+<div class="card warn" data-id="1105325728816162" data-lat="41.37053" data-lng="-72.91901" data-orig="">
+  <h2><span class="rank">9</span><a href="https://www.facebook.com/marketplace/item/1105325728816162">2013 Volkswagen Jetta 2.0L — $3,000</a></h2>
+  <div class="flag">⚠ Seller mentions "some minor fixes needed" — get the list before visiting; confirm it's an automatic</div>
+  <div class="meta">Hamden, CT · near your girlfriend, ~25 min from Branford garage · Seller: Hudson Kendall (7-yr account, no reviews)</div>
+  <div class="specs">
+    <div><b>Mileage</b>139,000</div>
+    <div><b>Transmission</b>Automatic (verify)</div>
+    <div><b>Drivetrain</b>FWD</div>
+    <div><b>Engine</b>2.0L 4-cyl</div>
+  </div>
+  <div class="note">Clean title, low miles, and the best location of any VW — easy for your brother to inspect. Ask what the "minor fixes" are and confirm the transmission before getting excited.</div>
+  <a class="btn" href="https://www.facebook.com/marketplace/item/1105325728816162">Open listing</a>
+<div class="statusbar"><button class="stbtn" data-act="contacted" type="button">✓ Contacted</button><button class="stbtn" data-act="sold" type="button">Sold / gone</button><button class="stbtn" data-act="dan" type="button">Dan approved</button><span class="stbadge"></span></div></div>
+<div class="card warn" data-id="2323560685122633" data-lat="41.74834" data-lng="-71.48941" data-orig="">
+  <h2><span class="rank">10</span><a href="https://www.facebook.com/marketplace/item/2323560685122633">2015 Nissan Sentra 1.8 S — $2,900</a></h2>
+  <div class="meta">Cranston, RI · ~45 min from Ledyard · Seller: Genel Gonzalez (no reviews, 3-yr account)</div>
+  <div class="specs">
+    <div><b>Mileage</b>136,000</div><div><b>Title</b>Unverified</div><div><b>Drivetrain</b>FWD</div>
+  </div>
+  <div class="note">Newest car on the list (2015) and the seller says MUST SELL ASAP — room to negotiate. No check-engine light per seller, but the title isn't confirmed and the seller has no ratings yet.</div>
+  <a class="btn" href="https://www.facebook.com/marketplace/item/2323560685122633">Open listing</a>
+<div class="statusbar"><button class="stbtn" data-act="contacted" type="button">✓ Contacted</button><button class="stbtn" data-act="sold" type="button">Sold / gone</button><button class="stbtn" data-act="dan" type="button">Dan approved</button><span class="stbadge"></span></div></div>
+<div class="card" data-id="1052364331183388" data-lat="41.75519" data-lng="-72.60576" data-orig="">
+  <h2><span class="rank">11</span><a href="https://www.facebook.com/marketplace/item/1052364331183388">2010 Nissan Sentra SL — $2,900</a></h2>
+  <div class="meta">East Hartford, CT · ~55 min from Ledyard · Seller: Ernest Ahima (4.5★, 15 reviews, new account)</div>
+  <div class="specs">
+    <div><b>Mileage</b>140,000</div><div><b>Title</b>Clean</div><div><b>Drivetrain</b>FWD</div>
+  </div>
+  <div class="note">Fully loaded (leather, sunroof, heated seats, nav, backup camera), no warning lights, passed emissions. Seller's account is new, so meet somewhere public and verify the title in hand.</div>
+  <a class="btn" href="https://www.facebook.com/marketplace/item/1052364331183388">Open listing</a>
+<div class="statusbar"><button class="stbtn" data-act="contacted" type="button">✓ Contacted</button><button class="stbtn" data-act="sold" type="button">Sold / gone</button><button class="stbtn" data-act="dan" type="button">Dan approved</button><span class="stbadge"></span></div></div>
+<div class="card warn" data-id="1630952898467126" data-lat="41.36627" data-lng="-72.09975" data-orig="">
+  <h2><span class="rank">12</span><a href="https://www.facebook.com/marketplace/item/1630952898467126">2011 Nissan Rogue SV — $3,350</a></h2>
+  <div class="meta">New London, CT · ~20 min from Ledyard · Seller: Luiz Mendieta Romero (5.0★, 10 reviews, 6-yr account)</div>
+  <div class="specs">
+    <div><b>Mileage</b>140,216</div><div><b>Title</b>Unverified</div><div><b>Drivetrain</b>AWD</div>
+  </div>
+  <div class="note">Empty ad, but a 5-star seller and only ~20 minutes away — the easiest viewing on the list after Norwich. Confirm title and mileage with a message first.</div>
+  <a class="btn" href="https://www.facebook.com/marketplace/item/1630952898467126">Open listing</a>
+<div class="statusbar"><button class="stbtn" data-act="contacted" type="button">✓ Contacted</button><button class="stbtn" data-act="sold" type="button">Sold / gone</button><button class="stbtn" data-act="dan" type="button">Dan approved</button><span class="stbadge"></span></div></div>
+<div class="card" data-id="1119418034098150" data-lat="41.77144" data-lng="-72.68906" data-orig="">
+  <h2><span class="rank">13</span><a href="https://www.facebook.com/marketplace/item/1119418034098150">2011 Subaru Impreza Wagon — $3,000</a></h2>
+  <div class="meta">Hartford, CT · ~40 min from Branford garage · Seller: Eddy Herrera (4.4★, 34 reviews, 17-yr account)</div>
+  <div class="specs">
+    <div><b>Mileage</b>159,000</div>
+    <div><b>Transmission</b>Automatic</div>
+    <div><b>Drivetrain</b>AWD</div>
+    <div><b>Engine</b>2.0L 4-cyl</div>
+  </div>
+  <div class="note">Clean CT title, no warning lights, no leaks or rust per seller, and new tires + brake pads fitted 3 months ago. Wagon practicality with AWD for CT winters.</div>
+  <a class="btn" href="https://www.facebook.com/marketplace/item/1119418034098150">Open listing</a>
+<div class="statusbar"><button class="stbtn" data-act="contacted" type="button">✓ Contacted</button><button class="stbtn" data-act="sold" type="button">Sold / gone</button><button class="stbtn" data-act="dan" type="button">Dan approved</button><span class="stbadge"></span></div></div>
+
+<div class="card" data-id="1813159813221739" data-lat="41.75519" data-lng="-72.60576" data-orig="">
+  <h2><span class="rank">14</span><a href="https://www.facebook.com/marketplace/item/1813159813221739">2012 Nissan Rogue Sport SL — $3,150</a></h2>
+  <div class="meta">East Hartford, CT · ~55 min from Ledyard · Seller: Oneil Hinds (3.6★, 8 reviews, 3-yr account)</div>
+  <div class="specs">
+    <div><b>Mileage</b>175,000</div><div><b>Title</b>Clean</div><div><b>Drivetrain</b>AWD</div>
+  </div>
+  <div class="note">Loaded (leather, sunroof, backup camera, 2 keys), emissions already passed. 175k is close to the 180k cap — check how much of that is highway and listen to the CVT closely.</div>
+  <a class="btn" href="https://www.facebook.com/marketplace/item/1813159813221739">Open listing</a>
+<div class="statusbar"><button class="stbtn" data-act="contacted" type="button">✓ Contacted</button><button class="stbtn" data-act="sold" type="button">Sold / gone</button><button class="stbtn" data-act="dan" type="button">Dan approved</button><span class="stbadge"></span></div></div>
+<div class="card warn" data-id="1093310759876739" data-lat="41.77144" data-lng="-72.68906" data-orig="">
+  <h2><span class="rank">15</span><a href="https://www.facebook.com/marketplace/item/1093310759876739">2011 Nissan Rogue — $3,500</a></h2>
+  <div class="meta">Hartford, CT · ~55 min from Ledyard · Seller: Elnegro Negro (no reviews, 5-yr account)</div>
+  <div class="specs">
+    <div><b>Mileage</b>130,000</div><div><b>Title</b>Unverified</div><div><b>Drivetrain</b>AWD</div>
+  </div>
+  <div class="note">No description at all and the seller has no ratings — the 130k miles are the only reason it's here. Message first; don't drive out blind.</div>
+  <a class="btn" href="https://www.facebook.com/marketplace/item/1093310759876739">Open listing</a>
+<div class="statusbar"><button class="stbtn" data-act="contacted" type="button">✓ Contacted</button><button class="stbtn" data-act="sold" type="button">Sold / gone</button><button class="stbtn" data-act="dan" type="button">Dan approved</button><span class="stbadge"></span></div></div>
+<div class="card warn" data-id="1643533050730153" data-lat="41.69696" data-lng="-71.74623" data-orig="">
+  <h2><span class="rank">16</span><a href="https://www.facebook.com/marketplace/item/1643533050730153">2010 Honda Accord LX — $3,500 <span style="font-weight:400;font-size:14px;">OBO</span></a></h2>
+  <div class="flag">⚠ Check-engine light on for O2 sensor (usually a cheap fix — confirm with your brother)</div>
+  <div class="meta">Greene, RI · near the corridor · Seller: Noah Brown (5.0★, 10 reviews, 16-yr account)</div>
+  <div class="specs">
+    <div><b>Mileage</b>167,000</div>
+    <div><b>Transmission</b>Automatic</div>
+    <div><b>Drivetrain</b>FWD</div>
+    <div><b>Engine</b>2.4L 4-cyl</div>
+  </div>
+  <div class="note">Daily-driven, clean title, remote start, and RI inspected through 2027. The O2-sensor code is typically a few-hundred-dollar fix, but get your brother's take before offering.</div>
+  <a class="btn" href="https://www.facebook.com/marketplace/item/1643533050730153">Open listing</a>
+<div class="statusbar"><button class="stbtn" data-act="contacted" type="button">✓ Contacted</button><button class="stbtn" data-act="sold" type="button">Sold / gone</button><button class="stbtn" data-act="dan" type="button">Dan approved</button><span class="stbadge"></span></div></div>
+<div class="card warn" data-id="4456862537921134" data-lat="41.82558" data-lng="-71.50199" data-orig="">
+  <h2><span class="rank">17</span><a href="https://www.facebook.com/marketplace/item/4456862537921134">2013 Nissan Altima 2.5 — $2,600</a></h2>
+  <div class="flag">⚠ Thin ad ("runs an drives … or trade") — verify title and mileage with the seller before viewing</div>
+  <div class="meta">Johnston, RI · ~40 min from Ledyard · Seller: Mike Anderson (17-yr account, no reviews)</div>
+  <div class="specs">
+    <div><b>Mileage</b>169,885</div><div><b>Title</b>Unverified</div><div><b>Drivetrain</b>FWD</div><div><b>Engine</b>2.5L 4-cyl</div>
+  </div>
+  <div class="note">Cheapest running Nissan on the list and miles verify under the cap, but the ad is two lines and the seller mentions trades — message first and don't drive out blind.</div>
+  <a class="btn" href="https://www.facebook.com/marketplace/item/4456862537921134">Open listing</a>
+<div class="statusbar"><button class="stbtn" data-act="contacted" type="button">✓ Contacted</button><button class="stbtn" data-act="sold" type="button">Sold / gone</button><button class="stbtn" data-act="dan" type="button">Dan approved</button><span class="stbadge"></span></div></div>
+</div>
+
+<h1 style="font-size:22px; margin: 28px 0 4px;">From Craigslist</h1>
+<div class="section" id="cl-section">
+
+<p class="sub">Owner listings from the Hartford, New Haven &amp; New London sections &middot; contact via the email/phone on each ad (no Messenger here)</p>
+
+<div class="card" data-id="cl-sH7ZamkGK89LXFhyTVbmYR" data-lat="41.54507" data-lng="-72.09201" data-orig="">
+  <h2><span class="rank">1</span><a href="https://www.craigslist.org/view/d/norwich-2012-subaru-impreza/4azqdWEf8cqXeRn8dnxjLq">2012 Subaru Impreza Hatchback — $3,100</a></h2>
+  <div class="flag">⚠ Ad heading says 2012 but the year field says 2010 — verify VIN/year with the seller's paperwork</div>
+  <div class="meta">Norwich, CT · priority eastern-CT zone (Ledyard–New London area)</div>
+  <div class="specs">
+    <div><b>Mileage</b>124,101</div>
+    <div><b>Transmission</b>Automatic</div>
+    <div><b>Drivetrain</b>AWD</div>
+    <div><b>Engine</b>4-cyl</div>
+  </div>
+  <div class="note">Lowest mileage of any candidate on either platform, clean title, seller says it runs great with cold A/C. Description is terse, so verify in person — but the location couldn't be better for you. The seller reposted the ad today (same car, fresh link) — and the year-field mismatch (2010 vs 2012 in the heading) still needs a VIN check.</div>
+  <a class="btn" href="https://www.craigslist.org/view/d/norwich-2012-subaru-impreza/4azqdWEf8cqXeRn8dnxjLq">Open listing</a>
+<div class="statusbar"><button class="stbtn" data-act="contacted" type="button">✓ Contacted</button><button class="stbtn" data-act="sold" type="button">Sold / gone</button><button class="stbtn" data-act="dan" type="button">Dan approved</button><span class="stbadge"></span></div></div>
+
+<div class="card" data-id="cl-wu2Jqge1vdoPpdNqDAucsZ" data-lat="41.7215" data-lng="-72.62002" data-orig="">
+  <h2><span class="rank">2</span><a href="https://www.craigslist.org/view/d/glastonbury-2010-nissan-sentra-fully/wu2Jqge1vdoPpdNqDAucsZ">2010 Nissan Sentra "fully loaded" — $2,900</a></h2>
+  <div class="meta">Glastonbury, CT · Route 2 corridor, ~55 min from Ledyard</div>
+  <div class="specs">
+    <div><b>Mileage</b>140,000</div>
+    <div><b>Transmission</b>Automatic</div>
+    <div><b>Drivetrain</b>FWD</div>
+    <div><b>Engine</b>4-cyl</div>
+    <div><b>Title</b>Clean</div>
+  </div>
+  <div class="note">Loaded up (leather, sunroof, heated seats, navigation) and the seller says it runs great. 140k is well-traveled for a Sentra CVT with nothing disclosed about it — drive it and listen closely. Contact via the ad's reply link (no phone number shown).</div>
+  <a class="btn" href="https://www.craigslist.org/view/d/glastonbury-2010-nissan-sentra-fully/wu2Jqge1vdoPpdNqDAucsZ">Open listing</a>
+<div class="statusbar"><button class="stbtn" data-act="contacted" type="button">✓ Contacted</button><button class="stbtn" data-act="sold" type="button">Sold / gone</button><button class="stbtn" data-act="dan" type="button">Dan approved</button><span class="stbadge"></span></div></div>
+
+<div class="card warn" data-id="cl-7Gh2Cb5Tmi1vegmKnVhyeE" data-lat="41.7215" data-lng="-72.62002" data-orig="">
+  <h2><span class="rank">3</span><a href="https://www.craigslist.org/view/d/glastonbury-2011-nissan-altima-25s/7Gh2Cb5Tmi1vegmKnVhyeE">2011 Nissan Altima 2.5S — $2,000</a></h2>
+  <div class="flag">⚠ Ad lists condition as "fair" — inspect carefully before offering</div>
+  <div class="meta">Glastonbury, CT · Route 2 corridor, ~55 min from Ledyard</div>
+  <div class="specs">
+    <div><b>Mileage</b>160,000</div>
+    <div><b>Transmission</b>Automatic</div>
+    <div><b>Drivetrain</b>FWD</div>
+    <div><b>Engine</b>2.5L 4-cyl</div>
+    <div><b>Title</b>Clean</div>
+  </div>
+  <div class="note">Cheapest car on either platform at the $2,000 floor, clean title, but "fair" condition and 160k miles means it's a backup at best — have your brother look it over before any offer. Contact via the ad's reply link (no phone number shown).</div>
+  <a class="btn" href="https://www.craigslist.org/view/d/glastonbury-2011-nissan-altima-25s/7Gh2Cb5Tmi1vegmKnVhyeE">Open listing</a>
+<div class="statusbar"><button class="stbtn" data-act="contacted" type="button">✓ Contacted</button><button class="stbtn" data-act="sold" type="button">Sold / gone</button><button class="stbtn" data-act="dan" type="button">Dan approved</button><span class="stbadge"></span></div></div>
+
+
+
+</div>
+
+<div class="footer">
+<b>What got filtered out (this run):</b> 2011 VW Jetta SportWagen (Providence, $2,999) sold since yesterday; a $2,000 "2012 Jetta" in Stonington that is no longer for sale (seller looking for a transmission mechanic); a 2012 VW Passat (Providence) with 268,000 miles on the dash; a rebuilt-title 2012 Jetta 2.0L (Rocky Hill); a duplicate relisted 2011 Jetta (New London); manual-transmission cars (a 2010 WRX that also needs an engine); TDIs and the 2.5L 5-cylinder Jettas (outside the 4-cyl rule); everything at/over 180k miles or pre-2010; anything over $3,500; a $3,500 2022 Corolla Cross and a $3,500 2022 Acura ILX that screamed bait pricing; coupes; American and Korean brands (Ford, Chevy, Kia, Jeep); Spanish-only listings; all Long Island listings; everything north or west of Hartford (Meriden, New Britain, Waterbury, Berlin, Bristol, Windsor Locks, Enfield) and all of Fairfield County; Massachusetts towns. Rebuilt/salvage titles are excluded entirely at Jack's request.<br><br>
+<b>Before buying any of these:</b> have your brother give the finalists a look at his Branford garage (that's the whole point of the ranking), run the VIN through the NICB database, and check CT rocker-panel/underbody rust in person — it's the #1 killer of budget cars here. Also worth getting an insurance quote for a newly licensed teen driver on your top 2–3 before you commit; that number can dwarf the purchase price.<br><br>
+<b>Note:</b> under $3,500 with under 180k miles, 2016+ models are rare — this run the newest qualifier is the 2015 Sentra (Cranston) (2016+ examples were manuals, out-of-area, or bait). The realistic sweet spot is still 2011–2015.
+</div>
+
+</div>
+
+<script>
+(function(){
+  var LS_KEY = "carSearchStatus.v1";
+  var SEED = {"1151078064542138": "contacted"};  // Oakdale Altima contacted (SportWagen sold Oct 10)
+  var status = {};
+  try { status = JSON.parse(localStorage.getItem(LS_KEY) || "{}"); } catch(e) { status = {}; }
+  function save(){ try { localStorage.setItem(LS_KEY, JSON.stringify(status)); } catch(e){} }
+  function getStatus(id){
+    if (Object.prototype.hasOwnProperty.call(status, id)) return status[id];
+    return SEED[id] || "";
+  }
+  var DAN_KEY = "carSearchDan.v1";
+  var dan = {};
+  try { dan = JSON.parse(localStorage.getItem(DAN_KEY) || "{}"); } catch(e) { dan = {}; }
+  function saveDan(){ try { localStorage.setItem(DAN_KEY, JSON.stringify(dan)); } catch(e){} }
+  function isDan(id){ return !!dan[id]; }
+
+  function paint(card){
+    var id = card.getAttribute("data-id");
+    var st = getStatus(id);
+    var d = isDan(id);
+    card.classList.toggle("is-contacted", st === "contacted");
+    card.classList.toggle("is-sold", st === "sold");
+    card.classList.toggle("is-dan", d);
+    var btns = card.querySelectorAll(".stbtn");
+    btns.forEach(function(b){
+      var act = b.getAttribute("data-act");
+      b.classList.toggle("on-contacted", st === "contacted" && act === "contacted");
+      b.classList.toggle("on-sold", st === "sold" && act === "sold");
+      b.classList.toggle("on-dan", d && act === "dan");
+    });
+    var badge = card.querySelector(".stbadge");
+    if (badge) {
+      var parts = [];
+      if (st === "contacted") parts.push("\u25cf Contacted");
+      if (st === "sold") parts.push("\u25cf Sold / gone");
+      if (d) parts.push("\u2713 Dan approved");
+      badge.textContent = parts.join(" \u00b7 ");
+    }
+    applyHide(card);
+  }
+  function applyHide(card){
+    var hide = document.getElementById("hideSold");
+    card.classList.toggle("hide-sold-card", !!hide && hide.checked && getStatus(card.getAttribute("data-id")) === "sold");
+  }
+
+  function initCard(card, idx){
+    card.setAttribute("data-orig", idx);
+    paint(card);
+    wireCard(card);
+  }
+  function wireCard(card){
+    card.querySelectorAll(".stbtn").forEach(function(b){
+      b.addEventListener("click", function(){
+        onStatusTap(card, b.getAttribute("data-act"));
+      });
+    });
+  }
+  function onStatusTap(card, act){
+    var id = card.getAttribute("data-id");
+    if (act === "dan") {
+      if (dan[id]) { delete dan[id]; } else { dan[id] = true; }
+      saveDan(); paint(card); return;
+    }
+    if (act === "sold") {
+      if (getStatus(id) === "sold" && card.parentNode) { status[id] = ""; save(); paint(card); }
+      else { status[id] = "sold"; save(); removeAndPromote(card); }
+      return;
+    }
+    var cur = getStatus(id);
+    status[id] = (cur === act) ? "" : act;
+    save(); paint(card);
+  }
+  var GONE_KEY = "carSearchGone.v1";
+  function loadGone(){
+    try { return JSON.parse(localStorage.getItem(GONE_KEY) || '{"removed":[],"promoted":[]}'); }
+    catch(e){ return {removed:[], promoted:[]}; }
+  }
+  function saveGone(g){ try { localStorage.setItem(GONE_KEY, JSON.stringify(g)); } catch(e){} }
+  function removeAndPromote(card){
+    var sec = card.parentNode;
+    var secId = sec.id;
+    var id = card.getAttribute("data-id");
+    var gone = loadGone();
+    if (gone.removed.indexOf(id) === -1) gone.removed.push(id);
+    var benchId = null;
+    for (var i = 0; i < BENCH.length; i++){
+      var bid = BENCH[i];
+      var used = false;
+      for (var j = 0; j < gone.promoted.length; j++) if (gone.promoted[j].id === bid) used = true;
+      if (!used && !document.querySelector('.card[data-id="'+bid+'"]')) { benchId = bid; break; }
+    }
+    sec.removeChild(card);
+    if (benchId && BENCH_HTML[benchId]) {
+      gone.promoted.push({id: benchId, sec: secId});
+      var tmp = document.createElement("div");
+      tmp.innerHTML = BENCH_HTML[benchId];
+      var newCard = tmp.firstChild;
+      initCard(newCard, 9999);
+      sec.appendChild(newCard);
+    } else if (!sec.querySelector(".bench-empty")) {
+      var note = document.createElement("div");
+      note.className = "bench-empty";
+      note.textContent = "A sold car was removed — no more backups in this batch. The next scan refills the list.";
+      sec.appendChild(note);
+    }
+    saveGone(gone);
+    renumber(sec);
+  }
+  var cards = Array.prototype.slice.call(document.querySelectorAll(".card"));
+  cards.forEach(function(card, i){ initCard(card, i); });
+  (function applyGone(){
+    var gone = loadGone();
+    var changed = false;
+    Array.prototype.slice.call(document.querySelectorAll(".card")).forEach(function(card){
+      var id = card.getAttribute("data-id");
+      if (getStatus(id) === "sold" && gone.removed.indexOf(id) === -1) { gone.removed.push(id); changed = true; }
+    });
+    gone.removed.forEach(function(id){
+      var c = document.querySelector('.card[data-id="'+id+'"]');
+      if (c) c.parentNode.removeChild(c);
+    });
+    gone.promoted.forEach(function(p){
+      if (document.querySelector('.card[data-id="'+p.id+'"]')) return;
+      var sec = document.getElementById(p.sec);
+      if (!sec || !BENCH_HTML[p.id]) return;
+      var tmp = document.createElement("div");
+      tmp.innerHTML = BENCH_HTML[p.id];
+      initCard(tmp.firstChild, 9999);
+      sec.appendChild(tmp.firstChild);
+    });
+    if (changed) saveGone(gone);
+    document.querySelectorAll(".section").forEach(renumber);
+  })();
+
+  var hideBox = document.getElementById("hideSold");
+  if (hideBox) hideBox.addEventListener("change", function(){
+    cards.forEach(applyHide);
+  });
+
+  function miles(lat1, lon1, lat2, lon2){
+    var R = 3958.8, dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
+    var a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+    return 2 * R * Math.asin(Math.sqrt(a));
+  }
+  function renumber(sec){
+    var n = 0;
+    sec.querySelectorAll(".card").forEach(function(c){
+      if (c.classList.contains("hide-sold-card")) return;
+      n++;
+      var r = c.querySelector(".rank");
+      if (r) r.textContent = n;
+    });
+  }
+  var PRESETS = {
+    "ledyard":     { label: "Ledyard",     lat: 41.4298,  lng: -72.08896 },
+    "willimantic": { label: "Willimantic", lat: 41.71609, lng: -72.2283 },
+    "hamden":      { label: "Hamden",      lat: 41.37053, lng: -72.91901 },
+    "branford":    { label: "Branford",    lat: 41.29777, lng: -72.77386 },
+    "providence":  { label: "Providence",  lat: 41.82388, lng: -71.41198 }
+  };
+var BENCH = [];
+  var BENCH_HTML = {};
+  
+  var TOWNS = {
+    "norwich":    { label: "Norwich, CT",    lat: 41.54507, lng: -72.09201 },
+    "newlondon":  { label: "New London, CT", lat: 41.36627, lng: -72.09975 },
+    "groton":     { label: "Groton, CT",     lat: 41.35143, lng: -72.05558 },
+    "waterford":  { label: "Waterford, CT",  lat: 41.38045, lng: -72.15071 },
+    "newhaven":   { label: "New Haven, CT",  lat: 41.30574, lng: -72.92173 },
+    "hartford":   { label: "Hartford, CT",   lat: 41.77144, lng: -72.68906 },
+    "middletown": { label: "Middletown, CT", lat: 41.56029, lng: -72.65008 },
+    "worcester":  { label: "Worcester, MA",  lat: 42.26341, lng: -71.80219 },
+    "warwick":    { label: "Warwick, RI",    lat: 41.71383, lng: -71.43217 },
+    "newport":    { label: "Newport, RI",    lat: 41.49256, lng: -71.31089 }
+  };
+  var townSelect = document.getElementById("townSelect");
+  if (townSelect) townSelect.addEventListener("change", function(){
+    var t = TOWNS[townSelect.value];
+    townSelect.value = "";
+    if (!t) return;
+    markActivePreset(null);
+    sortFrom(t.lat, t.lng, t.label);
+  });
+  function sortFrom(la, lo, label){
+    document.querySelectorAll(".section").forEach(function(sec){
+      var cs = Array.prototype.slice.call(sec.querySelectorAll(".card"));
+      cs.forEach(function(c){
+        var d = miles(la, lo, parseFloat(c.getAttribute("data-lat")), parseFloat(c.getAttribute("data-lng")));
+        c.setAttribute("data-dist", d);
+        var el = c.querySelector(".distline");
+        if (!el) {
+          el = document.createElement("div");
+          el.className = "distline";
+          var meta = c.querySelector(".meta");
+          meta.parentNode.insertBefore(el, meta.nextSibling);
+        }
+        el.textContent = "📍 ~" + Math.round(d) + " mi from " + label + " (straight line)";
+      });
+      cs.sort(function(a,b){ return parseFloat(a.getAttribute("data-dist")) - parseFloat(b.getAttribute("data-dist")); });
+      cs.forEach(function(c){ sec.appendChild(c); });
+      renumber(sec);
+    });
+  }
+  function markActivePreset(key){
+    document.querySelectorAll(".presetbtn").forEach(function(b){
+      b.classList.toggle("active", b.getAttribute("data-preset") === key);
+    });
+  }
+  document.querySelectorAll(".presetbtn").forEach(function(b){
+    b.addEventListener("click", function(){
+      var p = PRESETS[b.getAttribute("data-preset")];
+      markActivePreset(b.getAttribute("data-preset"));
+      sortFrom(p.lat, p.lng, p.label);
+    });
+  });
+  document.getElementById("zipBtn").addEventListener("click", function(){
+    var q = document.getElementById("zipInput").value.trim();
+    var msg = document.getElementById("zipMsg");
+    if (!q) { msg.textContent = "Type a ZIP or town first."; return; }
+    msg.textContent = "Looking up…";
+    fetch("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=us&q=" + encodeURIComponent(q))
+      .then(function(r){ return r.json(); })
+      .then(function(res){
+        if (!res || !res.length) { msg.textContent = "Couldn't find that place — try a ZIP or 'Town, ST'."; return; }
+        msg.textContent = "";
+        markActivePreset(null);
+        var label = res[0].display_name.split(",").slice(0, 2).join(",").trim();
+        sortFrom(parseFloat(res[0].lat), parseFloat(res[0].lon), label);
+      })
+      .catch(function(){ msg.textContent = "Lookup failed — check your connection and try again."; });
+  });
+  document.getElementById("zipInput").addEventListener("keydown", function(e){
+    if (e.key === "Enter") { e.preventDefault(); document.getElementById("zipBtn").click(); }
+  });
+  var sortBtn = document.getElementById("sortBtn");
+  sortBtn.addEventListener("click", function(){
+    if (!navigator.geolocation) { alert("Location isn't available in this browser — use one of the preset towns below instead."); return; }
+    sortBtn.disabled = true;
+    sortBtn.textContent = "Locating…";
+    navigator.geolocation.getCurrentPosition(function(pos){
+      markActivePreset(null);
+      sortFrom(pos.coords.latitude, pos.coords.longitude, "you");
+      sortBtn.disabled = false;
+      sortBtn.textContent = "📍 Sort by distance from me";
+    }, function(err){
+      sortBtn.disabled = false;
+      sortBtn.textContent = "📍 Sort by distance from me";
+      alert("Couldn't get your location (" + err.message + ") — use one of the preset towns instead, no permission needed.");
+    }, { timeout: 10000, maximumAge: 600000 });
+  });
+  document.getElementById("resetBtn").addEventListener("click", function(){
+    markActivePreset(null);
+    document.querySelectorAll(".section").forEach(function(sec){
+      var cs = Array.prototype.slice.call(sec.querySelectorAll(".card"));
+      cs.sort(function(a,b){ return parseInt(a.getAttribute("data-orig")) - parseInt(b.getAttribute("data-orig")); });
+      cs.forEach(function(c){
+        sec.appendChild(c);
+        var el = c.querySelector(".distline");
+        if (el) el.remove();
+      });
+      renumber(sec);
+    });
+  });
+})();
+</script>
+
+</body>
+</html>
